@@ -30,13 +30,13 @@ try:
   # lista con ORCIDID
   listOrcidID = list(dataSource["ORCID_ID"])
 except FileNotFoundError as err:
-  # file Status error
+  # File Status error
   with open(f'{pathCSV}{fileStatus}',"w") as f:
     f.write(f'Fecha: {x.strftime("%Y-%m-%d")}\nError: No se encontro Archivo fuente')
   print("Error: Verificar archivo status")
   exit()
 except KeyError as err:
-  # file Status error
+  # File Status error
   with open(f'{pathCSV}{fileStatus}',"w") as f:
     f.write(f'Fecha: {x.strftime("%Y-%m-%d")}\nError: Formato incorrecto en Archivo fuente')
   print("Error: Verificar archivo status")
@@ -48,6 +48,7 @@ for orcidID in listOrcidID:
   try: 
     request = requests.get(f'{url}{orcidID}/works', headers=headers)
   except:
+      # File Status error
       with open(f'{pathCSV}{fileStatus}',"w") as f:
         f.write(f'Fecha: {x.strftime("%Y-%m-%d")}\nError: Error en Request a API. Verifique conectividad o URL.')
       print("Error: Verificar archivo status")
@@ -66,27 +67,34 @@ for orcidID in listOrcidID:
         # Add ORCID_ID
         listdump.append(orcidID)
         # Add DOI
-        if work["external-ids"]["external-id"]:
-          for doi in work["external-ids"]["external-id"]:
+        dataDOI = work["external-ids"]["external-id"]
+        if dataDOI:
+          for doi in dataDOI:
             if doi["external-id-type"] == "doi" and rowControl:
               listdump.append(doi["external-id-normalized"]["value"])
               rowControl = False
           if rowControl: listdump.append(None)
         else: listdump.append(None)
         # Add Title
-        listdump.append(work["work-summary"][0]["title"]["title"]["value"]) if work["work-summary"][0]["title"]["title"] else listdump.append(None)
+        dataTitle = work["work-summary"][0]["title"]["title"]
+        listdump.append(dataTitle["value"]) if dataTitle else listdump.append(None)
         # Add type
-        listdump.append(work["work-summary"][0]["type"]) if work["work-summary"][0]["type"] else listdump.append(None)
+        dataType = work["work-summary"][0]["type"]
+        listdump.append(dataType) if dataType else listdump.append(None)
         # Add URL
-        listdump.append(work["work-summary"][0]["url"]["value"]) if work["work-summary"][0]["url"] else listdump.append(None)
+        dataURL = work["work-summary"][0]["url"]
+        listdump.append(dataURL["value"]) if dataURL else listdump.append(None)
         # Add Date
-        if work["work-summary"][0]["publication-date"]:
-          if work["work-summary"][0]["publication-date"]["year"] and work["work-summary"][0]["publication-date"]["month"] and work["work-summary"][0]["publication-date"]["day"]: listdump.append(f'{work["work-summary"][0]["publication-date"]["year"]["value"]}-{work["work-summary"][0]["publication-date"]["month"]["value"]}-{work["work-summary"][0]["publication-date"]["day"]["value"]}')
-          elif work["work-summary"][0]["publication-date"]["year"] and work["work-summary"][0]["publication-date"]["month"] and not work["work-summary"][0]["publication-date"]["day"]: listdump.append(f'{work["work-summary"][0]["publication-date"]["year"]["value"]}-{work["work-summary"][0]["publication-date"]["month"]["value"]}')
-          elif work["work-summary"][0]["publication-date"]["year"] and not work["work-summary"][0]["publication-date"]["month"] and not work["work-summary"][0]["publication-date"]["day"]: listdump.append(f'{work["work-summary"][0]["publication-date"]["year"]["value"]}')
+        dataDate = work["work-summary"][0]["publication-date"]
+        if dataDate:
+          dateYear = dataDate["year"]
+          dateMonth = dataDate["month"]
+          dateDay = dataDate["day"]
+          if dateYear and dateMonth and dateDay: listdump.append(f'{dateYear["value"]}-{dateMonth["value"]}-{dateDay["value"]}')
+          elif dateYear and dateMonth and not dateDay: listdump.append(f'{dateYear["value"]}-{dateMonth["value"]}')
+          elif dateYear and not dateMonth and not dateDay: listdump.append(f'{dateYear["value"]}')
           else: listdump.append(None)
-        else: listdump.append(None)
-          
+        else: listdump.append(None)          
         
         # Push a dataframe
         dataframe.append(listdump.copy())
@@ -94,7 +102,7 @@ for orcidID in listOrcidID:
         listdump.clear()
 
   else:
-    # file Status error
+    # File Status error
     with open(f'{pathCSV}{fileStatus}',"w") as f:
       f.write(f'Fecha: {x.strftime("%Y-%m-%d")}\nError: ORCID_ID [{orcidID}] incorrecto')
     print("Error: Verificar archivo status")
@@ -111,6 +119,7 @@ except:
     print("Error: Verificar archivo status")
     exit()
 
+# File status OK
 with open(f'{pathCSV}{fileStatus}',"w") as f:
   f.write(f'Fecha: {x.strftime("%Y-%m-%d")}\nOK: Proceso correcto\nORCID_ID verificados = {len(listOrcidID)}\nRegistros totales = {len(dataframe)}')
 print("OK: Proceso correcto")
