@@ -80,10 +80,13 @@ for orcidID in listOrcidID:
         # Add URL
         listdump.append(work["work-summary"][0]["url"]["value"]) if work["work-summary"][0]["url"] else listdump.append(None)
         # Add Date
-        if work["work-summary"][0]["publication-date"]["year"] and work["work-summary"][0]["publication-date"]["month"] and work["work-summary"][0]["publication-date"]["day"]: listdump.append(f'{work["work-summary"][0]["publication-date"]["year"]["value"]}-{work["work-summary"][0]["publication-date"]["month"]["value"]}-{work["work-summary"][0]["publication-date"]["day"]["value"]}')
-        elif work["work-summary"][0]["publication-date"]["year"] and work["work-summary"][0]["publication-date"]["month"] and not work["work-summary"][0]["publication-date"]["day"]: listdump.append(f'{work["work-summary"][0]["publication-date"]["year"]["value"]}-{work["work-summary"][0]["publication-date"]["month"]["value"]}')
-        elif work["work-summary"][0]["publication-date"]["year"] and not work["work-summary"][0]["publication-date"]["month"] and not work["work-summary"][0]["publication-date"]["day"]: listdump.append(f'{work["work-summary"][0]["publication-date"]["year"]["value"]}')
+        if work["work-summary"][0]["publication-date"]:
+          if work["work-summary"][0]["publication-date"]["year"] and work["work-summary"][0]["publication-date"]["month"] and work["work-summary"][0]["publication-date"]["day"]: listdump.append(f'{work["work-summary"][0]["publication-date"]["year"]["value"]}-{work["work-summary"][0]["publication-date"]["month"]["value"]}-{work["work-summary"][0]["publication-date"]["day"]["value"]}')
+          elif work["work-summary"][0]["publication-date"]["year"] and work["work-summary"][0]["publication-date"]["month"] and not work["work-summary"][0]["publication-date"]["day"]: listdump.append(f'{work["work-summary"][0]["publication-date"]["year"]["value"]}-{work["work-summary"][0]["publication-date"]["month"]["value"]}')
+          elif work["work-summary"][0]["publication-date"]["year"] and not work["work-summary"][0]["publication-date"]["month"] and not work["work-summary"][0]["publication-date"]["day"]: listdump.append(f'{work["work-summary"][0]["publication-date"]["year"]["value"]}')
+          else: listdump.append(None)
         else: listdump.append(None)
+          
         
         # Push a dataframe
         dataframe.append(listdump.copy())
